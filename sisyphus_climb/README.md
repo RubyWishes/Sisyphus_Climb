@@ -17,9 +17,15 @@ To ensure this project runs for reviewers, use the following specifications:
 - Compiler: GCC (recommended via w64devkit i686-w64-mingw32).
 - Architecture: 32-bit (win32).
 - Required Files: main.c, raylib.h, raymath.h, libraylib.a.
-- Command: `gcc main.c -o SisyphusGame.exe -L. -lraylib -lopengl32 -lgdi32 -lwinmm -static`
+- Command used to compile exe file: `gcc main.c -o SisyphusGame.exe -L. -lraylib -lopengl32 -lgdi32 -lwinmm -static`
+To ensure the game loads all assets (textures, music, and story data) correctly, please follow these steps:
+1. Navigate to the sisyphus_climb folder.
+2. Ensure the assets folder is in the same directory as SisyphusGame.exe.
+3. Double-click SisyphusGame.exe.
+Note: If Windows Defender shows a blue "Protected your PC" popup, click "More Info" and then "Run Anyway." This is normal for self-compiled unsigned programs.
 #### macOS
 - Compiler: Clang (cc).
 - Requirements: Raylib installed via Homebrew (brew install raylib).
-- Command: `cc main.c -o SisyphusClimb -lraylib -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL`
+- Command used to compile exe file: `cc main.c -o SisyphusClimb -lraylib -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL`
+
 
