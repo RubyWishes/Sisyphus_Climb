@@ -1,11 +1,30 @@
 #include "raylib.h"
+// Standard C headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <libgen.h>
-#include <unistd.h>
 #include <math.h>
+#include <stdint.h> // Essential for uint32_t on Windows
+
+// Platform-specific logic: Only include Windows.h on Windows and Mac headers on Mac
+#if defined(_WIN32)
+    #define NOGDI             // Basic optimization for windows.h
+    #define NOUSER            
+    #include <windows.h>
+
+    // --- THE FIX: Remove Windows macros that conflict with Raylib ---
+    #undef PlaySound   
+    #undef Rectangle
+    #undef CloseWindow
+    #undef ShowCursor
+    #undef DrawText
+#elif defined(__APPLE__)
+    #include <libgen.h>
+    #include <mach-o/dyld.h>
+    #include <unistd.h>
+#endif
+
 
 // 游戏常量
 
