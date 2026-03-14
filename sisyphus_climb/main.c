@@ -1,24 +1,29 @@
+// 1. Define Windows settings BEFORE any includes
+#if defined(_WIN32)
+    #define WIN32_LEAN_AND_MEAN
+    #define NOGDI
+    #define NOUSER
+#endif
+
 #include "raylib.h"
-// Standard C headers
+#include "raymath.h"
+// 2. Standard C headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include <stdint.h> // Essential for uint32_t on Windows
+#include <stdint.h> 
 
-// Platform-specific logic: Only include Windows.h on Windows and Mac headers on Mac
+// 3. Include Windows.h and immediately "kill" the conflicting names
 #if defined(_WIN32)
-    #define NOGDI             // Basic optimization for windows.h
-    #define NOUSER            
     #include <windows.h>
-
-    // --- THE FIX: Remove Windows macros that conflict with Raylib ---
-    #undef PlaySound   
-    #undef Rectangle
     #undef CloseWindow
     #undef ShowCursor
+    #undef Rectangle
     #undef DrawText
+    #undef PlaySound
+    #undef GetCurrentTime
 #elif defined(__APPLE__)
     #include <libgen.h>
     #include <mach-o/dyld.h>
@@ -137,15 +142,25 @@ const char* GetExecutableDir() {
     static char exePath[1024] = {0};
     if (exePath[0] != '\0') return exePath;
 
-    uint32_t bufSize = sizeof(exePath);
-    if (_NSGetExecutablePath(exePath, &bufSize) == 0) {
-        char* dir = dirname(exePath);
-        strcpy(exePath, dir);
-        printf("✅ 可执行文件目录：%s\n", exePath);
-    } else {
-        strcpy(exePath, "/Users/boya/Documents/sisyphus_climb");
-        printf("⚠️ 获取可执行路径失败，使用默认路径：%s\n", exePath);
-    }
+    #if defined(_WIN32)
+        // Windows logic to get current folder
+        GetModuleFileNameA(NULL, exePath, sizeof(exePath));
+        char* lastSlash = strrchr(exePath, '\\');
+        if (lastSlash) *lastSlash = '\0';
+        printf("✅ Windows Directory: %s\n", exePath);
+
+    #elif defined(__APPLE__)
+        // macOS logic (Teammate's original)
+        uint32_t bufSize = sizeof(exePath);
+        if (_NSGetExecutablePath(exePath, &bufSize) == 0) {
+            char* dir = dirname(exePath);
+            strcpy(exePath, dir);
+            printf("✅ macOS Directory: %s\n", exePath);
+        } else {
+            strcpy(exePath, "/Users/boya/Documents/sisyphus_climb");
+        }
+    #endif
+
     return exePath;
 }
 
@@ -169,35 +184,36 @@ void SpawnNewWord(GameData* game);
 bool CheckDemonCatch(GameData* game);
 
 // ========== 补充缺失的函数声明 ==========
-float Lerp(float start, float end, float amount);
-float Vector2Length(Vector2 v);
-Vector2 Vector2Normalize(Vector2 v);
+
+// float Lerp(float start, float end, float amount);
+// float Vector2Length(Vector2 v);
+// Vector2 Vector2Normalize(Vector2 v);
 bool CheckDemonCatch(GameData* game);
 void InitGameData(GameData* game);
 void UpdateGamePlaying(GameData* game, GameState* currentState, float deltaTime);
 void DrawGamePlaying(GameData* game);
 
 // ========== 手动实现缺失的数学函数 ==========
-// 插值函数（Lerp）
-float Lerp(float start, float end, float amount) {
-    return start + (end - start) * amount;
-}
+// // 插值函数（Lerp）
+// float Lerp(float start, float end, float amount) {
+//     return start + (end - start) * amount;
+// }
 
-// 计算Vector2长度（模长）
-float Vector2Length(Vector2 v) {
-    return sqrtf(v.x*v.x + v.y*v.y);
-}
+// // 计算Vector2长度（模长）
+// float Vector2Length(Vector2 v) {
+//     return sqrtf(v.x*v.x + v.y*v.y);
+// }
 
-// Vector2归一化（单位向量）
-Vector2 Vector2Normalize(Vector2 v) {
-    Vector2 result = {0.0f, 0.0f};
-    float length = Vector2Length(v);
-    if (length > 0.00001f) {
-        result.x = v.x / length;
-        result.y = v.y / length;
-    }
-    return result;
-}
+// // Vector2归一化（单位向量）
+// Vector2 Vector2Normalize(Vector2 v) {
+//     Vector2 result = {0.0f, 0.0f};
+//     float length = Vector2Length(v);
+//     if (length > 0.00001f) {
+//         result.x = v.x / length;
+//         result.y = v.y / length;
+//     }
+//     return result;
+// }
 
 int main(void) {
     // 初始化窗口 + 直接全屏（解决展开窗口问题）
